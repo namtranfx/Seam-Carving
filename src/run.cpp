@@ -1,7 +1,7 @@
 #include "Header.h"
 #include <vector>
 
-void test(Mat image) {
+void edgeDetectOpenCV(Mat image) {
 	Mat grad, src_gray;
 	// Remove noise by blurring with a Gaussian filter ( kernel size = 3 )
 	GaussianBlur(image, src_gray, Size(3, 3), 0, 0, BORDER_DEFAULT);
@@ -28,33 +28,32 @@ void test(Mat image) {
 	waitKey(0);
 }
 
+
 int main() {
-	string filename = "test3.png";
+	string filename = "test.jpg";
 	if (std::filesystem::exists(filename)) {
 		cout << "File existance confirmed" << endl;
 	}
-	
 	Mat srcImg = imread(filename, IMREAD_GRAYSCALE);
-	
-	
 	if (!srcImg.data) {
 		cout << "Cannot read image" << endl;
 		return -1;
 	}
-	
 
-	Mat edgeImg = srcImg.clone();
-	
+	imshow("Source Image", srcImg);
+	waitKey(0);
+	//===========================
+
+	Mat edgeImg = srcImg.clone();	
 	GaussianBlur(edgeImg, edgeImg, cv::Size(3, 3), 0);
-	
 	edgeImg = detectEdge(edgeImg);
 
 	imshow("Edge Detection Result", edgeImg);
 	waitKey(0);
-	
-	
-	test(srcImg);
-	
-	
+	//====================
+	edgeDetectOpenCV(srcImg);
+
+	//====================
+
 	return 0;
 }
