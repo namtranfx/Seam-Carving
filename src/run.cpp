@@ -40,20 +40,21 @@ int main() {
 		return -1;
 	}
 
-	imshow("Source Image", srcImg);
-	waitKey(0);
-	//===========================
+	/*imshow("Source Image", srcImg);
+	waitKey(0);*/
+	////===========================
 
-	Mat edgeImg = srcImg.clone();	
-	GaussianBlur(edgeImg, edgeImg, cv::Size(3, 3), 0);
-	edgeImg = detectEdge(edgeImg);
+	//Mat edgeImg = srcImg.clone();	
+	//GaussianBlur(edgeImg, edgeImg, cv::Size(3, 3), 0);
+	//edgeImg = detectEdge(edgeImg);
 
-	imshow("Edge Detection Result", edgeImg);
-	waitKey(0);
-	//====================
-	edgeDetectOpenCV(srcImg);
+	//imshow("Edge Detection Result", edgeImg);
+	//waitKey(0);
+	////====================
+	//edgeDetectOpenCV(srcImg);
 
-	//====================
+	////====================
 
+	SeamCarving(srcImg, 100);
 	return 0;
 }

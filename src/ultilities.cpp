@@ -151,3 +151,105 @@ Mat detectEdge(Mat input, bool detail, float threshold) {
 	return dest;
 }
 // SEAM CARVING
+
+template <class MyMat> int* findCostArr(MyMat* matrix, const int& nrow, const int& ncol) {
+	int* cost = new int[static_cast<int>(nrow * ncol)]{ 0 };
+	for (int i = 0; i < ncol; i++)
+	{
+		cost[(nrow - 1) * ncol + i] = matrix[(nrow - 1) * ncol + i];
+	}
+	for (int row = nrow - 2; row >= 0; row--)
+	{
+		for (int col = 0; col < ncol; col++)
+		{
+			int col1 = max(col - 1, 0), col2 = min(ncol - 1, col + 1);
+			int vmin = cost[(row + 1) * ncol + col];
+			if (vmin < cost[(row + 1) * ncol + col1]) vmin = cost[(row + 1) * ncol + col1];
+			if (vmin < cost[(row + 1) * ncol + col2]) vmin = cost[(row + 1) * ncol + col2];
+			cost[row * ncol + col] = static_cast<int>(matrix[row * ncol + col]) + vmin;
+		}
+	}
+	return cost;
+}
+
+int* findSeam(int* cost, const int& nrow, const int& ncol) {
+	int* path = new int[nrow] {0};
+	int path_idx = 0;
+	int vmin_idx = 0;
+	for (int i = 1; i < ncol; i++)
+	{
+		if (cost[0 * ncol + vmin_idx] < cost[0 * ncol + i]) vmin_idx = i;
+	}
+	path[path_idx++] = vmin_idx;
+
+	for (int row = 0; row < nrow - 1; row++)
+	{
+		int col1 = max(vmin_idx - 1, 0), col2 = min(ncol - 1, vmin_idx + 1);
+		if (cost[(row + 1) * ncol + col1] < cost[(row + 1) * ncol + vmin_idx]) vmin_idx = col1;
+		if (cost[(row + 1) * ncol + col2] < cost[(row + 1) * ncol + vmin_idx]) vmin_idx = col2;
+		path[path_idx++] = vmin_idx;
+	}
+	return path;
+}
+template <class MyMat> void removeSeam(MyMat*& pixels,const int& nrow, int& ncol, int* path, const int& nchannel = 1) {
+	MyMat* newPixels = new MyMat[nchannel * nrow * (ncol - 1)]{ 0 };
+	int colidx = 0;
+	for (int row = 0; row < nrow; row++)
+	{
+		colidx = 0;
+		for (int col = 0; col < ncol; col++)
+		{
+			if (col == path[row]) continue;
+			for (int c = 0; c < nchannel; c++)
+			{
+				newPixels[nchannel * (row * (ncol - 1) + colidx) + c] = pixels[nchannel * (row * ncol + col) + c];
+			}
+			colidx++;
+		}
+	}
+	delete[] pixels;
+	ncol--;
+	pixels = newPixels;
+}
+void SeamCarving(Mat input, int npixels = 1) {
+	int nrow = input.rows, ncol = input.cols, nchannel = input.channels();
+	int edge_ncol = input.cols;
+	if (npixels > ncol) {
+		cout << "Cannot resize image too much" << endl;
+		return;
+	}
+	// Initialize variable
+	uchar* pixel = new uchar[nchannel * nrow * ncol]{ 0 };
+	uchar* edgepixel = new uchar[nchannel * nrow * ncol]{ 0 };
+	memcpy(pixel, input.ptr(), nchannel * nrow * ncol);
+
+	// GRAYSCALE Edge Image
+	Mat edgeImg = input.clone();
+	if (nchannel == 3) {
+		cvtColor(input, edgeImg, cv::COLOR_RGB2GRAY);
+	}
+	
+	// Edge Detection using as an Energy Map
+	GaussianBlur(edgeImg, edgeImg, cv::Size(3, 3), 0);
+	edgeImg = detectEdge(edgeImg);
+	memcpy(edgepixel, edgeImg.ptr(), nchannel * nrow * ncol);
+	imshow("Edge Detection Result", edgeImg);
+	waitKey(0);
+	for (int i = 0; i < npixels; i++) {
+		// Calculate cost for pixel
+		int* cost = findCostArr<uchar>(pixel, nrow, ncol);
+		// Find Seam Path which can remove from image
+		int* seam = findSeam(cost, nrow, ncol);
+		// Remove that seams 
+		removeSeam<uchar>(pixel, nrow, ncol, seam, nchannel);
+		removeSeam<uchar>(edgepixel, nrow, edge_ncol, seam);
+		// End the manipulation progress
+		delete[] cost;
+		delete[] seam;
+	}
+	// Get the final image
+	Mat final(nrow, ncol, input.type(), pixel);
+	// Show the image
+	imshow("Seam Carving Image", final);
+	waitKey(0);
+}
