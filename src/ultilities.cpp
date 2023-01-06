@@ -178,7 +178,7 @@ int* findSeam(int* cost, const int& nrow, const int& ncol) {
 	int vmin_idx = 0;
 	for (int i = 1; i < ncol; i++)
 	{
-		if (cost[0 * ncol + vmin_idx] < cost[0 * ncol + i]) vmin_idx = i;
+		if (cost[0 * ncol + vmin_idx] > cost[0 * ncol + i]) vmin_idx = i;
 	}
 	path[path_idx++] = vmin_idx;
 
