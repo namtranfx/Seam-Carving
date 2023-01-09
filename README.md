@@ -1,2 +1,2 @@
-# Seam-Carving-Team33
+# Seam-Carving
 Parallelize Seam Carving problem using GPU
