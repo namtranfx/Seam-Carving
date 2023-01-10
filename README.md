@@ -1,5 +1,5 @@
 # Seam-Carving
-Seam Carving project for resizing image
+Seam Carving project for resizing image without using image library
 # Command Line Argument: 
 <execute_filename> <input_filename> <output_filename> <n_percent>
   - <input_filename>: This program only work with .pnm image
