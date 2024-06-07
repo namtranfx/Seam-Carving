@@ -1,5 +1,6 @@
 # Seam-Carving
-Seam Carving project for resizing image without using image library
+- Seam Carving Algorithm for resizing image without using image library.
+- An implementation using C++ template metaprogramming techniques.
 # Command Line Argument: 
 <execute_filename> <input_filename> <output_filename> <n_percent>
   - <input_filename>: This program only work with .pnm image
